@@ -1,0 +1,12 @@
+Changelog for Pagination SEO
+==================================
+
+
+## 1.1
+
+- Change to how template data is retrieved
+
+
+## 1.0
+
+- Release version - Adapted from Pagination Rel Links
