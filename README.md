@@ -1,4 +1,4 @@
-Pagination Rel Links
+Pagination SEO
 =======================
 
 For ExpressionEngine 2
