@@ -18,7 +18,7 @@ class Pagination_seo_ext {
 	public $docs_url		= 'https://github.com/ignetic/ee-pagination-seo';
 	public $name			= 'Pagination SEO';
 	public $settings_exist	= 'y';
-	public $version			= '1.1';
+	public $version			= '1.2';
 	
 	private $pagination = array();
 	
@@ -188,11 +188,13 @@ class Pagination_seo_ext {
 		if ($offset > 0 && $total_items > 0 && $offset < $total_items)
 		{
 			ee()->pagination_seo->settings['prev_uri'] = $url.($offset-$per_page>0 ? $prefix_uri.($offset-$per_page) : '');
+			if ($offset-$per_page > 0) ee()->pagination_seo->settings['prev_num'] = $offset-$per_page;
 		}
 		
 		if ($total_items > 0 && $offset < $total_items-$per_page)
 		{
 			ee()->pagination_seo->settings['next_uri'] = $url.$prefix_uri.($offset+$per_page);
+			ee()->pagination_seo->settings['next_num'] = $offset+$per_page;
 		}
 		
 		
@@ -331,7 +333,7 @@ class Pagination_seo_ext {
 				}
 			}
 		}
-		
+
 		
 		// Update template tags (base template to limit the replaces)
 		if ( ! $is_partial)
@@ -346,6 +348,9 @@ class Pagination_seo_ext {
 			
 			$final_template = str_replace('{pagination_seo:prev_url}', ($prev_uri ? $site_url.$prev_uri : ''), $final_template);
 			$final_template = str_replace('{pagination_seo:next_url}', ($next_uri ? $site_url.$next_uri : ''), $final_template);
+			
+			$final_template = str_replace('{pagination_seo:prev_num}', $this->pagination['prev_num'], $final_template);
+			$final_template = str_replace('{pagination_seo:next_num}', $this->pagination['next_num'], $final_template);
 			
 			$final_template = str_replace('{pagination_seo:prev}', ($prev_uri ? '<link rel="prev" href="'.$site_url.$prev_uri.'" />' : ''), $final_template);
 			$final_template = str_replace('{pagination_seo:next}', ($next_uri ? '<link rel="next" href="'.$site_url.$next_uri.'" />' : ''), $final_template);

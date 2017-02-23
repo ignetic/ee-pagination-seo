@@ -13,6 +13,7 @@ $this->table->set_heading(
 $this->table->add_row('{pagination_seo:prev} <br> {pagination_seo:next}', lang('pagination_seo_rel_links_tag').':<br><code>&lt;link rel="prev" href="http://www.example.com/articles/P10" /&gt; <br> &lt;link rel="next" href="http://www.example.com/articles/P30" /&gt;</code>');
 $this->table->add_row('{pagination_seo:prev_url} <br> {pagination_seo:next_url}', lang('pagination_seo_urls_tag').': <br> <code>http://www.example.com/articles/P10 <br> http://www.example.com/articles/P30</code> ');
 $this->table->add_row('{pagination_seo:prev_uri} <br> {pagination_seo:next_uri}', lang('pagination_seo_uris_tag').': <br> <code>articles/P10 <br> articles/P30</code> ');
+$this->table->add_row('{pagination_seo:prev_num} <br> {pagination_seo:next_num}', lang('pagination_seo_nums_tag').': <br> <code>10 <br> 30</code> ');
 $this->table->add_row('{pagination_seo:title}', lang('pagination_seo_title_tag').':<br><code>&lt;title&gt;{title}{pagination_seo:title}&lt;/title&gt;</code>');
 $this->table->add_row('{pagination_seo:description}', lang('pagination_seo_description_tag').'<br><code>&lt;meta name="description" content="{pagination_seo:description}{description}" /&gt;</code>');
 $this->table->add_row('{pagination_seo:page_num} <br> {pagination_seo:total_pages} <br> {pagination_seo:total_items} ', lang('pagination_seo_vars_tag'));
