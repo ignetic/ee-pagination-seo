@@ -1,0 +1,28 @@
+Changelog for Pagination SEO
+==================================
+
+
+## 1.4
+
+- Added redirect where page numbers don't fit within per page values i.e. invalid P# numbers
+
+## 1.3.1
+
+- Updated to EE3 compatibility
+
+## 1.3
+
+- Changes to sql Ce_cache module so that the query isn't cached when creating pagination - cased issues with comment module
+
+## 1.2
+
+- Added prev_num and next_num tags as numeric page numbers
+
+## 1.1
+
+- Change to how template data is retrieved
+
+
+## 1.0
+
+- Release version - Adapted from Pagination Rel Links

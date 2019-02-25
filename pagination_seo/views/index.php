@@ -1,4 +1,4 @@
-<?=form_open('C=addons_extensions'.AMP.'M=save_extension_settings'.AMP.'file=pagination_seo');?>
+<?=form_open($save_url);?>
 
 <h3><?= lang('pagination_seo_description'); ?></h3>
 

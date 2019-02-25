@@ -9,7 +9,7 @@ $lang = array(
 	'page_num_description' => 'Page numbers in description tag:<br><em>Available tags: {page_num} {total_pages} {total_items}</em>',
 	
 	'display_on_first_page' => 'Display page numbers within the title and description on the first paginated page?<br><em>Enable this to show the Page Numbers on the first paginated page</em>',
-	'enable_redirect' => 'Enable redirect to first page where pagination is not found?<br><em>This will help avoid out-of-range pagination problems which automatically redirects to the first page</em>',
+	'enable_redirect' => 'Enable redirect to first page where pagination is not found or is invalid?<br><em>This will help avoid out-of-range pagination problems which automatically redirects to the first page</em>',
 	'use_caching' => 'Enable caching support (experimental)?<br><em>Enable this if the tags don\'t display when caching is enabled (e.g. with CE Cache)</em>',
 	
 	'pagination_seo_rel_links_tag' => 'Place these tag in the head of the html. This will output for an example',

@@ -1,7 +1,7 @@
 Pagination SEO
 =======================
 
-For ExpressionEngine 2
+For ExpressionEngine 3
 
 This extension enables you to add next and prev rel links to paginated pages.
 This creates HTML link elements with rel="next" and rel="prev" to indicate the relationship between component URLs in a paginated series.
@@ -27,7 +27,7 @@ An example output would be:
 `<link rel="prev" href="http://www.example.com/articles/P10" />`
 `<link rel="next" href="http://www.example.com/articles/P30" />`
 
-Note: These tags can also be used in NSM Better Meta settings.
+Note: These tags can also be added to the settings within NSM Better Meta or SEO Lite addons.
 
 
 You may also use the following tags to only output the URL and URI:
@@ -96,4 +96,9 @@ pagination_create
 template_post_parse
 
 
-Installation: copy files to system > expressionengine > third_party
+Installation 
+------------
+
+EE2: copy files to system/expressionengine/third_party/pagination_seo
+EE3: copy files to system/user/addons/pagination_seo
+

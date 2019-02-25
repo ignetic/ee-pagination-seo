@@ -18,7 +18,7 @@ class Pagination_seo_ext {
 	public $docs_url		= 'https://github.com/ignetic/ee-pagination-seo';
 	public $name			= 'Pagination SEO';
 	public $settings_exist	= 'y';
-	public $version			= '1.2';
+	public $version			= '1.4.1';
 	
 	private $pagination = array();
 	
@@ -98,7 +98,7 @@ class Pagination_seo_ext {
 	 * @param $data, $count
 	 * @return void
 	 */
-	public function pagination_create(&$data, $count)
+	public function pagination_create($data, $count)
 	{
 		$settings = (array_merge($this->defaults, $this->settings));
 		
@@ -117,8 +117,12 @@ class Pagination_seo_ext {
 
 		// Let's check to see if Better Pagination extension is installed and active and support this
 		// Unable to use sql queries which conflicts with comments module query caching
-		$extensions  = ee()->addons->get_installed('extensions');
-		if (isset($extensions['better_pagination']))
+		//$extensions  = ee()->addons->get_installed('extensions');
+		//if (isset($extensions['better_pagination']))
+
+		$sql  = "SELECT version FROM ".ee()->db->dbprefix."extensions WHERE class = 'Better_pagination_ext' AND enabled = 'y' LIMIT 1";
+		$query = ee()->db->query($sql);
+		if ($query->num_rows > 0)
 		{
 			// Use Better Pagination
 			$config = ee()->config->item('better_pagination');
@@ -238,19 +242,22 @@ class Pagination_seo_ext {
 			ee()->pagination_seo->settings['title'] = $title;
 			ee()->pagination_seo->settings['description'] = $description;
 		}
-
 		
+		// Only redirect if it isn't an ajax request
+		$is_ajax = ee()->input->is_ajax_request();
+
 		// Redirect to main page if pagination not found
-		if ($this->enable_redirect == TRUE)
+		if (!$is_ajax && $this->enable_redirect == TRUE)
 		{
-			if($offset > 0 && $total_items > 0 && $offset >= $total_items && $url != $current_url)
+			// check if page number fits within per_page value and if it is within the total number of item
+			// otherwise redirect to firt page
+			if(is_float($page_num) || ($offset > 0 && $total_items > 0 && $offset >= $total_items && $url != $current_url))
 			{
 				header( "HTTP/1.1 301 Moved Permanently" );
 				header( "Location: /".$url );
 				die();
 			}
 		}
-		
 		
 		// An attempt to store pagination info somewhere when the pagination has been cached.
 		// When cached it is not normally possible to get pagination info - doesn't get called
@@ -275,13 +282,15 @@ class Pagination_seo_ext {
 
 			
 			// Escape tag if CE Cache is used, otherwise it will display the unparsed tag
-
-			$query = ee()->db->select('module_version')->from('modules')->where('module_name', 'ce_cache')->limit(1)->get();
+			// Remove the following otherwise the query caches within pagination
+			//$query = ee()->db->select('module_version')->from('modules')->where('module_name', 'ce_cache')->limit(1)->get();
+			$sql  = "SELECT module_version FROM ".ee()->db->dbprefix."modules WHERE module_name = 'ce_cache' LIMIT 1";
+			$query = ee()->db->query($sql);
 			if ($query->num_rows > 0)
 			{
 				$tag_cache = '{exp:ce_cache:escape:pagination_seo}'.$tag_cache.'{/exp:ce_cache:escape:pagination_seo}';
 			}
-
+			$query->free_result();
 
 			// Write back to pagination template
 			if (!empty($first_key))
@@ -392,6 +401,15 @@ class Pagination_seo_ext {
 		$vars['settings']['display_on_first_page'] = '<label>'.form_radio('display_on_first_page', 'y', $settings['display_on_first_page'] == 'y') .' '. lang('yes') .' </label> &nbsp; <label>' . form_radio('display_on_first_page', 'n', $settings['display_on_first_page'] == 'n') .' '. lang('no') .' </label>';
 		$vars['settings']['enable_redirect'] = '<label>'.form_radio('enable_redirect', 'y', $settings['enable_redirect'] == 'y') .' '. lang('yes') .' </label> &nbsp; <label>' . form_radio('enable_redirect', 'n', $settings['enable_redirect'] == 'n') .' '. lang('no') .' </label>';
 		$vars['settings']['use_caching'] = '<label>'.form_radio('use_caching', 'y', $settings['use_caching'] == 'y') .' '. lang('yes') .' </label> &nbsp; <label>' . form_radio('use_caching', 'n', $settings['use_caching'] == 'n') .' '. lang('no') .' </label>';
+		
+		if (APP_VER >= 3)
+		{
+			$vars['save_url'] = ee('CP/URL', 'addons/settings/pagination_seo/save');
+		}
+		else
+		{
+			$vars['save_url'] = BASE.AMP.'C=addons_extensions'.AMP.'M=save_extension_settings'.AMP.'file=pagination_seo';
+		}
 
 		return ee()->load->view('index', $vars, TRUE);
 	}
@@ -404,6 +422,7 @@ class Pagination_seo_ext {
 	 */
 	function save_settings()
 	{
+
 		if (empty($_POST))
 		{
 			show_error(lang('unauthorized_access'));
@@ -421,9 +440,18 @@ class Pagination_seo_ext {
 			lang('preferences_updated')
 		);
 		
-		ee()->functions->redirect(
-            BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file=pagination_seo'
-        );
+		
+		if (APP_VER >= 3)
+		{
+			$redirect_url = ee('CP/URL', 'addons/settings/pagination_seo');
+		} 
+		else
+		{
+			$redirect_url =  BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file=pagination_seo';
+		}
+
+		ee()->functions->redirect($redirect_url);
+
 	}
 	
 
