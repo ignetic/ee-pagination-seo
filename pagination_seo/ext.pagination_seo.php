@@ -18,7 +18,7 @@ class Pagination_seo_ext {
 	public $docs_url		= 'https://github.com/ignetic/ee-pagination-seo';
 	public $name			= 'Pagination SEO';
 	public $settings_exist	= 'y';
-	public $version			= '1.4.1';
+	public $version			= '1.4.2';
 	
 	private $pagination = array();
 	
@@ -36,9 +36,9 @@ class Pagination_seo_ext {
 	 *
 	 * @param 	mixed	Settings array or empty string if none exist.
 	 */
-	public function __construct($settings = '')
+	public function __construct($settings = array())
 	{
-		$this->settings = $settings;
+		$this->settings = array_merge($this->defaults, $settings);
 		
 		$this->enable_redirect = FALSE;
 		if (isset($this->settings['enable_redirect']) && $this->settings['enable_redirect'] == 'y')
@@ -57,8 +57,7 @@ class Pagination_seo_ext {
 	public function activate_extension()
 	{
 		// Setup custom settings in this array.
-		$this->settings = array();
-		
+
 		$data = array(
 			'class'		=> __CLASS__,
 			'method'	=> 'pagination_create',
@@ -88,9 +87,38 @@ class Pagination_seo_ext {
 
 		ee()->db->insert('extensions', $data);
 		
+		$data = array(
+			'class'		=> __CLASS__,
+			'method'	=> 'sessions_start',
+			'hook'		=> 'sessions_start',
+			'settings'	=> serialize($this->settings),
+			'priority' => 10,
+			'version'	=> $this->version,
+			'enabled'	=> 'y',
+		);
+
+		ee()->db->insert('extensions', $data);
+		
 	}	
 	// ----------------------------------------------------------------------
 
+	/**
+	 * sessions_start
+	 * remove variables if this isn't a page - such as action pages
+	 *
+	 * @param $data Object
+	 * @return void
+	 */
+	public function sessions_start($data)
+	{
+		if (REQ !== 'PAGE')
+		{
+			ee()->config->_global_vars['pagination_seo:title'] = '';
+			ee()->config->_global_vars['pagination_seo:description'] = '';
+			ee()->config->_global_vars['pagination_seo:prev'] = '';
+			ee()->config->_global_vars['pagination_seo:next'] = '';
+		}
+	}
 	
 	/**
 	 * pagination_create
@@ -100,7 +128,7 @@ class Pagination_seo_ext {
 	 */
 	public function pagination_create($data, $count)
 	{
-		$settings = (array_merge($this->defaults, $this->settings));
+		$settings = $this->settings;
 		
 		$params = ee()->TMPL->tagparams;
 
@@ -228,8 +256,8 @@ class Pagination_seo_ext {
 			$description = $settings['page_num_description'];
 		}
 
-		$title = str_replace(array('{page_num}', '{total_pages}', '{total_items}'), array($page_num, $total_pages, $total_items), $title);
-		$description = str_replace(array('{page_num}', '{total_pages}', '{total_items}'), array($page_num, $total_pages, $total_items), $description);
+		$title = str_replace(array(LD.'page_num'.RD, LD.'total_pages'.RD, LD.'total_items'.RD), array($page_num, $total_pages, $total_items), $title);
+		$description = str_replace(array(LD.'page_num'.RD, LD.'total_pages'.RD, LD.'total_items'.RD), array($page_num, $total_pages, $total_items), $description);
 		
 		
 		// Store vars
@@ -277,7 +305,7 @@ class Pagination_seo_ext {
 			
 			foreach (ee()->pagination_seo->settings as $key => $val)
 			{
-				if ($val) $tag_cache .= '{pagination_seo:set:'.$key.'='.$val.'}';			
+				if ($val) $tag_cache .= LD.'pagination_seo:set:'.$key.'='.$val.RD;			
 			}
 
 			
@@ -288,7 +316,7 @@ class Pagination_seo_ext {
 			$query = ee()->db->query($sql);
 			if ($query->num_rows > 0)
 			{
-				$tag_cache = '{exp:ce_cache:escape:pagination_seo}'.$tag_cache.'{/exp:ce_cache:escape:pagination_seo}';
+				$tag_cache = LD.'exp:ce_cache:escape:pagination_seo'.RD.$tag_cache.LD.'/exp:ce_cache:escape:pagination_seo'.RD;
 			}
 			$query->free_result();
 
@@ -299,7 +327,7 @@ class Pagination_seo_ext {
 			}
 			else
 			{
-				$template_data .= $tag_cache;
+				$template_data[] .= $tag_cache;
 			}
 			$data->__set('template_data', $template_data);
 	
@@ -349,20 +377,20 @@ class Pagination_seo_ext {
 		{
 			foreach ($this->pagination as $key => $val)
 			{
-				$final_template = str_replace('{pagination_seo:'.$key.'}', $val, $final_template);			
+				$final_template = str_replace(LD.'pagination_seo:'.$key.RD, $val, $final_template);			
 			}
 			
 			$prev_uri = $this->pagination['prev_uri'];
 			$next_uri = $this->pagination['next_uri'];
 			
-			$final_template = str_replace('{pagination_seo:prev_url}', ($prev_uri ? $site_url.$prev_uri : ''), $final_template);
-			$final_template = str_replace('{pagination_seo:next_url}', ($next_uri ? $site_url.$next_uri : ''), $final_template);
+			$final_template = str_replace(LD.'pagination_seo:prev_url'.RD, ($prev_uri ? $site_url.$prev_uri : ''), $final_template);
+			$final_template = str_replace(LD.'pagination_seo:next_url'.RD, ($next_uri ? $site_url.$next_uri : ''), $final_template);
 			
-			$final_template = str_replace('{pagination_seo:prev_num}', $this->pagination['prev_num'], $final_template);
-			$final_template = str_replace('{pagination_seo:next_num}', $this->pagination['next_num'], $final_template);
+			$final_template = str_replace(LD.'pagination_seo:prev_num'.RD, $this->pagination['prev_num'], $final_template);
+			$final_template = str_replace(LD.'pagination_seo:next_num'.RD, $this->pagination['next_num'], $final_template);
 			
-			$final_template = str_replace('{pagination_seo:prev}', ($prev_uri ? '<link rel="prev" href="'.$site_url.$prev_uri.'" />' : ''), $final_template);
-			$final_template = str_replace('{pagination_seo:next}', ($next_uri ? '<link rel="next" href="'.$site_url.$next_uri.'" />' : ''), $final_template);
+			$final_template = str_replace(LD.'pagination_seo:prev'.RD, ($prev_uri ? '<link rel="prev" href="'.$site_url.$prev_uri.'" />' : ''), $final_template);
+			$final_template = str_replace(LD.'pagination_seo:next'.RD, ($next_uri ? '<link rel="next" href="'.$site_url.$next_uri.'" />' : ''), $final_template);
 			
 			
 			// Remove any tags used for cached link urls
@@ -370,7 +398,7 @@ class Pagination_seo_ext {
 			{
 				foreach ($this->pagination as $key => $val)
 				{
-					$final_template = str_replace('{pagination_seo:set:'.$key.'='.$val.'}', '', $final_template);
+					$final_template = str_replace(LD.'pagination_seo:set:'.$key.'='.$val.RD, '', $final_template);
 				}
 			}
 			
@@ -392,7 +420,7 @@ class Pagination_seo_ext {
 		ee()->load->helper('form');
 		ee()->load->library('table');
 
-		$settings = (array_merge($this->defaults, $current));
+		$settings = array_merge($this->defaults, $current);
 		
 		$vars = array();
 
@@ -422,15 +450,12 @@ class Pagination_seo_ext {
 	 */
 	function save_settings()
 	{
-
 		if (empty($_POST))
 		{
 			show_error(lang('unauthorized_access'));
 		}
 
 		unset($_POST['submit']);
-
-//		ee()->lang->loadfile('pagination_seo');
 
 		ee()->db->where('class', __CLASS__);
 		ee()->db->update('extensions', array('settings' => serialize($_POST)));
@@ -487,6 +512,21 @@ class Pagination_seo_ext {
 			return FALSE;
 		}
 		
+		if (version_compare($current, '1.4.2', '<'))
+		{
+			$data = array(
+				'class'		=> __CLASS__,
+				'method'	=> 'sessions_start',
+				'hook'		=> 'sessions_start',
+				'settings'	=> serialize($this->settings),
+				'priority' => 10,
+				'version'	=> $this->version,
+				'enabled'	=> 'y',
+			);
+
+			ee()->db->insert('extensions', $data);
+		}
+		
 		ee()->db->where('class', __CLASS__);
 		ee()->db->update(
 				'extensions', 
@@ -499,4 +539,3 @@ class Pagination_seo_ext {
 }
 
 /* End of file ext.pagination_seo.php */
-/* Location: /system/expressionengine/third_party/pagination_seo/ext.pagination_seo.php */

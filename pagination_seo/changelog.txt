@@ -1,6 +1,9 @@
 Changelog for Pagination SEO
 ==================================
 
+## 1.4.2
+
+- Added sessions_start extension hook to clear the variables where the loaded template isn't a page
 
 ## 1.4
 

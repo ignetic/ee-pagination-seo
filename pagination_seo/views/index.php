@@ -38,9 +38,8 @@ echo $this->table->generate();
 
 ?>
 
-<p><?=form_submit('submit', lang('submit'), 'class="submit"')?></p>
+<p><?=form_submit('submit', lang('submit'), 'class="btn submit"')?></p>
 <?php $this->table->clear()?>
 <?=form_close()?>
 <?php
 /* End of file index.php */
-/* Location: ./system/expressionengine/third_party/pagination_seo/views/index.php */

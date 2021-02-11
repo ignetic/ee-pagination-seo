@@ -100,5 +100,5 @@ Installation
 ------------
 
 EE2: copy files to system/expressionengine/third_party/pagination_seo
-EE3: copy files to system/user/addons/pagination_seo
+EE3+: copy files to system/user/addons/pagination_seo
 
